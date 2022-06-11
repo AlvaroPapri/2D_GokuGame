@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using Random = UnityEngine.Random;
 
 public class PlayerMovement : MonoBehaviour
@@ -10,29 +8,35 @@ public class PlayerMovement : MonoBehaviour
     public float rayLength;
     public float fallMultiplier;
     public float lowJumpMultiplier;
+    public float nextAttackTime;
+    public int basicDamage;
+    public int comboDamage;
+    public int specialDamage;
 
     public GameObject colliderAttackRight;
     public GameObject colliderAttackLeft;
     public LayerMask groundMask;
     public Transform groundCheck;
     
-    [SerializeField]
     private float horizontal, vertical;
-    
     [SerializeField]
     private bool isJumping;
     [SerializeField]
     private bool isOnGround;
-    [SerializeField] 
+    [SerializeField]
     private bool isAttacking;
+    [SerializeField]
     private bool isSpecialAttack;
+    [SerializeField]
+    private int attackCounter;
     
     private Rigidbody2D rb;
     private Animator anim;
     private Ray2D ray;
     private RaycastHit2D hit;
     private SpriteRenderer spriteRenderer;
-
+    private float lastClickTime;
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -48,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
         Animating();
         Flip();
         AttackPressed();
+        SpecialAttackPressed();
     }
 
     private void FixedUpdate()
@@ -56,7 +61,10 @@ public class PlayerMovement : MonoBehaviour
         Jump();
         BetterJumping();
         Attack();
+        SpecialAttack();
     }
+
+    #region Input
 
     private void InputPlayer()
     {
@@ -66,6 +74,10 @@ public class PlayerMovement : MonoBehaviour
             vertical = Input.GetAxis("Vertical");
         }
     }
+
+    #endregion
+
+    #region Animation
 
     void Animating()
     {
@@ -86,6 +98,35 @@ public class PlayerMovement : MonoBehaviour
             spriteRenderer.flipX = true;
     }
 
+    #endregion
+
+    #region Checkers
+
+    void JumpPressed()
+    {
+        if (Input.GetKey(KeyCode.Space) && isOnGround)
+            isJumping = true;
+    }
+
+    void AttackPressed()
+    {
+        if (Input.GetMouseButtonDown(0) && isOnGround)
+            isAttacking = true;
+    }
+
+    void SpecialAttackPressed()
+    {
+        if (Input.GetMouseButtonDown(1) && isOnGround)
+            isSpecialAttack = true;
+    }
+    
+    bool isOnIdleState() => anim.GetCurrentAnimatorStateInfo(0).IsName("Idle");
+
+
+    #endregion
+
+    #region Movement & Ground
+
     void Movement()
     {
         if (!isAttacking)
@@ -99,7 +140,6 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector2.zero;
             horizontal = 0;
         }
-        
     }
 
     void GroundDetection()
@@ -109,11 +149,9 @@ public class PlayerMovement : MonoBehaviour
         Debug.DrawRay(groundCheck.position, Vector2.down * rayLength, Color.red);
     }
 
-    void JumpPressed()
-    {
-        if (Input.GetKey(KeyCode.Space) && isOnGround)
-            isJumping = true;
-    }
+    #endregion
+
+    #region Jump
 
     void Jump()
     {
@@ -130,28 +168,23 @@ public class PlayerMovement : MonoBehaviour
         if (rb.velocity.y < 0)
             rb.velocity += Vector2.up * (Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime);
         else if (rb.velocity.y > 0 && !Input.GetButton("Jump"))
-            rb.velocity += Vector2.up * (Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime);
+            rb.velocity += Vector2.up * (Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime);
     }
 
-    void AttackPressed()
-    {
-        if (Input.GetMouseButtonDown(0) && isOnGround)
-            isAttacking = true;
+    #endregion
 
-        if (Input.GetMouseButtonDown(1) && isOnGround)
-            isSpecialAttack = true;
-    }
+    #region Attack
 
     void Attack()
     {
-        if ((!isAttacking || isSpecialAttack) && Input.GetMouseButtonDown(0) && isOnGround)
+        if (isAttacking && isOnIdleState())
         {
-            isAttacking = true;
             rb.velocity = Vector2.zero;
-            
             anim.SetTrigger("Attack");
             
-            if (isSpecialAttack) 
+            CheckCombo();
+            
+            if (isCombo()) 
             {
                 anim.SetInteger("AttackSelector", 2);
             }
@@ -160,8 +193,51 @@ public class PlayerMovement : MonoBehaviour
                 int n = Random.Range(0, 2);
                 anim.SetInteger("AttackSelector", n); 
             }
+            Debug.Log("El daño es:" + Damage());
+            
+            lastClickTime = Time.time;
         }
     }
+    
+    void SpecialAttack()
+    {
+        if (isSpecialAttack && isOnIdleState())
+        {
+            rb.velocity = Vector2.zero;
+            
+            anim.SetTrigger("Attack");
+            anim.SetInteger("AttackSelector", 3);
+            lastClickTime = Time.time;
+        }
+    }
+
+    void CheckCombo()
+    {
+        if ((Time.time - lastClickTime) < nextAttackTime)
+            attackCounter++;
+        else
+            attackCounter = 0;
+    }
+
+    bool isCombo() => attackCounter == 4;
+
+    public int Damage()
+    {
+        if (isCombo())
+            return comboDamage; // Damage = 20 per hit
+
+        return basicDamage; // Damage = 10 per hit
+    }
+    
+    void AttackToFalse()
+    {
+        isAttacking = false;
+        isSpecialAttack = false;
+    } 
+
+    #endregion
+
+    #region Colliders
 
     void EnableAttackCollider()
     {
@@ -179,10 +255,5 @@ public class PlayerMovement : MonoBehaviour
         colliderAttackLeft.SetActive(false);
     }
 
-    void AttackToFalse()
-    {
-        isAttacking = false;
-        isSpecialAttack = false;
-    } 
-
+    #endregion
 }

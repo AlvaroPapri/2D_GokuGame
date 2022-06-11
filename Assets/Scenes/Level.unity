@@ -1081,17 +1081,18 @@ MonoBehaviour:
   rayLength: 0.1
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
+  nextAttackTime: 1
   colliderAttackRight: {fileID: 749399448}
   colliderAttackLeft: {fileID: 813477576}
   groundMask:
     serializedVersion: 2
     m_Bits: 64
   groundCheck: {fileID: 1351829605}
-  horizontal: 0
-  vertical: 0
   isJumping: 0
   isOnGround: 0
   isAttacking: 0
+  isSpecialAttack: 0
+  attackCounter: 0
 --- !u!1 &1055037605
 GameObject:
   m_ObjectHideFlags: 0
@@ -4854,6 +4855,7 @@ GameObject:
   - component: {fileID: 1827680757}
   - component: {fileID: 1827680756}
   - component: {fileID: 1827680755}
+  - component: {fileID: 1827680759}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4927,14 +4929,28 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1827680754}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.23, y: 2.42, z: -10}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -16.477474, y: 3.6208868, z: -7.138703}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1827680759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827680754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b5bba6328e6cf74fb107b300675e451, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1002641767}
+  smoothTargetTime: 0.5
 --- !u!1 &1856658089
 GameObject:
   m_ObjectHideFlags: 0

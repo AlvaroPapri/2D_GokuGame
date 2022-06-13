@@ -9,9 +9,9 @@ public class PlayerMovement : MonoBehaviour
     public float fallMultiplier;
     public float lowJumpMultiplier;
     public float nextAttackTime;
-    public int basicDamage;
-    public int comboDamage;
-    public int specialDamage;
+    public float basicDamage;
+    public float comboDamage;
+    public float specialDamage;
 
     public GameObject colliderAttackRight;
     public GameObject colliderAttackLeft;
@@ -193,7 +193,6 @@ public class PlayerMovement : MonoBehaviour
                 int n = Random.Range(0, 2);
                 anim.SetInteger("AttackSelector", n); 
             }
-            Debug.Log("El daño es:" + Damage());
             
             lastClickTime = Time.time;
         }
@@ -221,7 +220,7 @@ public class PlayerMovement : MonoBehaviour
 
     bool isCombo() => attackCounter == 4;
 
-    public int Damage()
+    public float Damage()
     {
         if (isCombo())
             return comboDamage; // Damage = 20 per hit
